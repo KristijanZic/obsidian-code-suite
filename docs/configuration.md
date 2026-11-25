@@ -128,6 +128,9 @@ Absolute path to the Rscript executable used by `r` blocks. Leave empty to resol
 ### Dotnet path
 Absolute path to the dotnet executable used by `csharp` blocks. Leave empty to resolve `dotnet` via PATH. C# blocks run as .NET 10 file-based apps (`dotnet run code.cs`), so .NET 10 or later is required. The first run after starting your computer takes a few seconds while the compiler starts.
 
+### Nix path
+Absolute path to the `nix-instantiate` executable used by `nix` blocks. Leave empty to resolve `nix-instantiate` via PATH. Nix blocks are evaluated strictly with `nix-instantiate --eval --strict`.
+
 ### Auto-prepend PHP opening tag
 When enabled, CodeSuite adds `<?php` to the temporary execution file for PHP blocks that do not already start with a PHP opening tag. Your note content is not modified.
 

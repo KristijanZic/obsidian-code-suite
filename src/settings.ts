@@ -195,6 +195,8 @@ export interface CodePluginSettings {
   rPath: string;
   /** Custom path to the dotnet executable (used by the `csharp` language). */
   dotnetPath: string;
+  /** Custom path to nix-instantiate (used by the `nix` language). */
+  nixPath: string;
   /**
    * Windows only: how to hand temp script paths to POSIX shells (bash/zsh/sh).
    * WSL bash lives in a Linux filesystem namespace, so a Windows path like
@@ -345,6 +347,7 @@ export const DEFAULT_SETTINGS: CodePluginSettings = {
   shPath: "",
   rPath: "",
   dotnetPath: "",
+  nixPath: "",
   wslMode: "auto",
   autoPrependPhpOpenTag: true,
   shellLogin: false,

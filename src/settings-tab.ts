@@ -711,6 +711,11 @@ export class CodeSettingTab extends PluginSettingTab {
             render: this.text("dotnetPath", "dotnet"),
           },
           {
+            name: "Nix path",
+            desc: "Used by nix blocks (runs nix-instantiate --eval --strict).",
+            render: this.text("nixPath", "nix-instantiate"),
+          },
+          {
             name: "WSL path translation",
             desc: "Pass script paths to WSL shells as /mnt/c/…. Choose Off for Git Bash, Cygwin, or MSYS.",
             visible: () => Platform.isWin,

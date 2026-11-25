@@ -5,6 +5,7 @@ import * as os from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { startExecution } from "../src/executor";
+import { Highlighter } from "../src/highlighter";
 import { DEFAULT_SETTINGS } from "../src/settings";
 
 // Exclude the host's Homebrew paths to model a GUI session with no system Node.
@@ -151,4 +152,57 @@ test("R plots are captured from the default graphics device", {
   const result = await startExecution("plot(1:3)\ndev.off()\nhist(1:3)\ncat('done\\n')", "r", DEFAULT_SETTINGS).promise;
   assert.equal(result.exitCode, 0, result.stderr);
   assert.deepEqual(result.figures.map((figure) => [figure.kind, figure.figureIndex]), [["image", 1001], ["image", 2001]]);
+});
+
+test("Nix evaluates expressions strictly with nix-instantiate", {
+  skip: spawnSync("nix-instantiate", ["--version"]).status !== 0,
+}, async () => {
+  const code = 'let x = 1 + 2; in { sum = x; list = [ (x * 2) "ok" ]; }';
+  const result = await startExecution(code, "nix", DEFAULT_SETTINGS).promise;
+  assert.equal(result.exitCode, 0, result.stderr);
+  assert.equal(result.stdout.trim(), '{ list = [ 6 "ok" ]; sum = 3; }');
+});
+
+test("Nix evaluation errors report a non-zero exit code and stderr", {
+  skip: spawnSync("nix-instantiate", ["--version"]).status !== 0,
+}, async () => {
+  const result = await startExecution('1 + "nope"', "nix", DEFAULT_SETTINGS).promise;
+  assert.notEqual(result.exitCode, 0);
+  assert.match(result.stderr, /error:/);
+});
+
+test("Nix uses the configured nixPath executable", {
+  skip: process.platform === "win32",
+}, async () => {
+  const bin = mkdtempSync(join(os.tmpdir(), "code-suite-nix-"));
+  try {
+    const fakeNix = join(bin, "fake-nix-instantiate");
+    writeFileSync(fakeNix, `#!/usr/bin/env node
+if (process.argv[2] !== "--eval" || process.argv[3] !== "--strict" || !process.argv[4].endsWith(".nix")) process.exit(2);
+console.log("custom nix path");
+`, { mode: 0o755 });
+    const result = await startExecution("{ a = 1; }", "nix", {
+      ...DEFAULT_SETTINGS,
+      nixPath: fakeNix,
+    }).promise;
+    assert.equal(result.exitCode, 0, result.stderr);
+    assert.equal(result.stdout, "custom nix path\n");
+  } finally {
+    rmSync(bin, { recursive: true, force: true });
+  }
+});
+
+test("Highlighter resolves and highlights Nix code and .nix files", async () => {
+  const highlighter = new Highlighter();
+  await highlighter.init();
+  try {
+    assert.equal(highlighter.resolveLanguage("nix"), "nix");
+    assert.equal(highlighter.resolveExtension(".nix"), "nix");
+    const html = highlighter.highlight('let x = 42; in { inherit x; }', "nix", "gruvbox-dark-hard");
+    assert.ok(html && html.includes("inherit"), "expected highlighted HTML for Nix");
+    const tokens = highlighter.tokenize('let x = 42; in x', "nix", "gruvbox-dark-hard");
+    assert.ok(tokens && tokens.length === 1 && tokens[0].length > 1, "expected syntax tokens for Nix");
+  } finally {
+    highlighter.dispose();
+  }
 });

@@ -50,6 +50,7 @@ Any fenced code block in a supported language gets a **Run** button in Reading v
 | C# | `csharp` / `cs` / `c#` | `dotnet run` (.NET 10+) |
 | C | `c` | `gcc`, then the compiled program |
 | C++ | `cpp` / `c++` | `g++`, then the compiled program |
+| Nix | `nix` | `nix-instantiate --eval --strict` |
 
 Except for MATLAB, each run spawns a **fresh process** and reconstructs state through the replay session described below. MATLAB uses one isolated Engine per note and closes it after the configured idle timeout.
 

@@ -27,6 +27,7 @@ const RUNTIMES: Record<string, { cmd: string; args: string[]; ext: string }> = {
   csharp:     { cmd: "dotnet",   args: ["run", "--file"], ext: ".cs" },
   c:          { cmd: "gcc",      args: [],           ext: ".c" },
   cpp:        { cmd: "g++",      args: [],           ext: ".cpp" },
+  nix:        { cmd: "nix-instantiate", args: ["--eval", "--strict"], ext: ".nix" },
 };
 
 /** Languages handled directly by this subprocess executor. */
@@ -248,6 +249,8 @@ export function startExecution(
     cmd = settings.rPath;
   } else if (lang === "csharp" && settings.dotnetPath) {
     cmd = settings.dotnetPath;
+  } else if (lang === "nix" && settings.nixPath) {
+    cmd = settings.nixPath;
   }
 
   // Build env. Order of precedence (later overrides earlier):
@@ -259,12 +262,20 @@ export function startExecution(
   const env: Record<string, string | undefined> = { ...getProcess().env, ...dotEnv, ...extraEnv, CODESUITE_OUTPUT_DIR: imgDir };
 
   // On macOS, GUI apps (like Obsidian) don't inherit the user's shell PATH,
-  // so Homebrew tools (/opt/homebrew/bin on Apple Silicon, /usr/local/bin on Intel)
-  // are not found. Prepend the common locations so brew/node/python etc. work.
+  // so Homebrew and Nix tools are not found. Prepend the common locations so
+  // brew/nix/node/python etc. work.
   if (os.platform() === "darwin") {
-    const brewPaths = ["/opt/homebrew/bin", "/opt/homebrew/sbin", "/usr/local/bin", "/usr/local/sbin"];
+    const macPaths = [
+      "/opt/homebrew/bin",
+      "/opt/homebrew/sbin",
+      "/usr/local/bin",
+      "/usr/local/sbin",
+      "/run/current-system/sw/bin",
+      "/nix/var/nix/profiles/default/bin",
+      path.join(os.homedir(), ".nix-profile", "bin"),
+    ];
     const existing = new Set((env["PATH"] || "").split(path.delimiter));
-    const missing = brewPaths.filter((p) => !existing.has(p));
+    const missing = macPaths.filter((p) => !existing.has(p));
     if (missing.length > 0) {
       env["PATH"] = missing.join(path.delimiter) + path.delimiter + (env["PATH"] || "");
     }

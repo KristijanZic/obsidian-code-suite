@@ -68,6 +68,7 @@ test("maps fence languages to an extension that embeds as the same language", ()
   assert.equal(ext("python"), ".py");
   assert.equal(ext("yml"), ".yaml");
   assert.equal(ext("C++"), ".cpp");
+  assert.equal(ext("nix"), ".nix");
   assert.equal(ext("{r, echo=FALSE}"), ".r");
   // `sh` runs POSIX sh but a `.sh` embed runs bash, and `.md` would transclude a note.
   assert.equal(ext("sh"), null);

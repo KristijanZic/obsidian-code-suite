@@ -111,6 +111,7 @@ import langPerl from "shiki/langs/perl.mjs";
 import langTsx from "shiki/langs/tsx.mjs";
 import langJsx from "shiki/langs/jsx.mjs";
 import langIni from "shiki/langs/ini.mjs";
+import langNix from "shiki/langs/nix.mjs";
 
 const ALL_THEMES = [
   gruvboxDarkHard, gruvboxDarkMedium, gruvboxDarkSoft,
@@ -141,7 +142,7 @@ const ALL_LANGS = [
   langJson, langYaml, langToml, langSql, langMarkdown, langLatex, langR,
   langRuby, langLua, langSwift, langKotlin, langXml, langDiff,
   langDockerfile, langMakefile, langPowershell, langGraphql, langHaskell,
-  langScala, langPhp, langPerl, langTsx, langJsx, langIni,
+  langScala, langPhp, langPerl, langTsx, langJsx, langIni, langNix,
 ];
 
 /** Map common aliases to Shiki language IDs */
@@ -173,7 +174,7 @@ export const EXT_TO_LANG: Record<string, string> = {
   ".ps1": "powershell", ".graphql": "graphql", ".gql": "graphql",
   ".hs": "haskell", ".scala": "scala", ".sc": "scala",
   ".php": "php", ".pl": "perl", ".pm": "perl",
-  ".makefile": "makefile",
+  ".makefile": "makefile", ".nix": "nix",
 };
 
 export class Highlighter {
